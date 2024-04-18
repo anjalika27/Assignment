@@ -1,4 +1,3 @@
-import { timeStamp } from "console";
 import mongoose from "mongoose";
 
 const userSchema=mongoose.Schema({
@@ -13,6 +12,10 @@ const userSchema=mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    verified:{
+        type:Boolean,
+        default:false
     },
     location:{
         type:String

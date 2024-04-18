@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import User from "./models/userSchema.js";
+import router from "./router/userRoutes.js";
 dotenv.config();
 
 const app=express();
@@ -19,16 +20,6 @@ mongoose.connect(process.env.URI).then(() => {
 });
 
 
-app.post('/register',async (req,res)=>{
-    const {email,password}=req.body;
-    try {
-        await User.create({
-            email:email,
-            password:password
-        });
-        console.log("user added");
-        return res.send("user added");
-    } catch (error) {
-        console.log(error.message);
-    }
-});
+app.use("/",router);
+
+
