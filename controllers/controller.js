@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { generate } from "otp-generator";
 import Verify from "../models/userVerification.js";
-import { verify } from "crypto";
+import { jwtAuthMiddleware, createToken } from "../services/jwt.js";
 
 
 // generate otp for verification
@@ -61,13 +61,12 @@ async function registerOtp(email, otp) {
     }
 }
 
-
 // new user register and send mail with otp for verification
 async function registerUser(req, res) {
-    const { name,email, password } = req.body;
+    const { name, email, password } = req.body;
     try {
         await User.create({
-            name:name,
+            name: name,
             email: email,
             password: password
         });
@@ -141,23 +140,44 @@ async function addMoreDetails(req, res) {
             return res.json({ msg: "user not created" })
         }
 
-        
-        const {_id,verified} = currUser[0];
 
-        if(verified){
+        const { _id, verified } = currUser[0];
+
+        if (verified) {
             await User.findByIdAndUpdate(_id, { location: location, age: age, work_details, work_details }, { new: true })
-            return res.json({msg:"user added details saved"})
+            return res.json({ msg: "user added details saved" })
         }
-        else{
-            return res.json({msg:"user not verified yet, please verify"})
+        else {
+            return res.json({ msg: "user not verified yet, please verify" })
         }
 
     } catch (error) {
         console.log(error.message);
-        return res.json({msg:"cannot add details of user"})
+        return res.json({ msg: "cannot add details of user" })
     }
 }
 
+//login user 
+async function loginUser(req, res) {
+    const { email, password } = req.body;
+    try {
+        const user = await User.find({ email });
+        const token = createToken(user[0]._id);
+        return res.send(token);
+    } catch (error) {
+        return res.json({ msg: error.message })
+    }
+}
+
+// get user details 
+async function userDetails(req, res) {
+    const {id}=req.jwtpayload;
+    const details=await User.find({_id:id});
+    if(details[0].verified)
+        return res.json(details);
+    else
+        return res.json({msg:"user not verified"});
+}
 
 
-export { registerUser, verifyUserEmailUsingOtp, addMoreDetails};
+export { registerUser, verifyUserEmailUsingOtp, addMoreDetails, loginUser, userDetails };
