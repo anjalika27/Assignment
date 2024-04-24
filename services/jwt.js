@@ -4,7 +4,6 @@ dotenv.config();
 const key = process.env.SECRETKEY;
 
 
-
 // create token for user
 function createToken(id) {
     return jwt.sign({ id }, key, { expiresIn: 300 }); //5min
